@@ -12,6 +12,34 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [polishing, setPolishing] = useState(false);
+
+  const handlePolishPost = async () => {
+    if (!content.trim()) {
+      alert('Please write something in your post first to polish.');
+      return;
+    }
+    setPolishing(true);
+    try {
+      const res = await api.post('/api/ai/rewrite', { text: content, type: 'post' });
+      setAiSuggestion(res.data.rewritten);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to polish post with AI');
+    } finally {
+      setPolishing(false);
+    }
+  };
+
+  const handleAcceptSuggestion = () => {
+    setContent(aiSuggestion);
+    setAiSuggestion('');
+  };
+
+  const handleDiscardSuggestion = () => {
+    setAiSuggestion('');
+  };
+
   useEffect(() => {
     const storedUserJson = localStorage.getItem('user');
     if (!storedUserJson) {
@@ -114,7 +142,54 @@ export default function FeedPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem' }}>
+          {aiSuggestion && (
+            <div
+              style={{
+                background: 'rgba(124, 58, 237, 0.1)',
+                border: '1px solid #7c3aed',
+                borderRadius: '8px',
+                padding: '0.85rem',
+                marginBottom: '1rem',
+              }}
+            >
+              <p style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: '600', marginBottom: '0.3rem' }}>
+                AI Suggestion (under 200 chars):
+              </p>
+              <p style={{ fontSize: '0.9rem', marginBottom: '0.6rem', color: 'var(--text-primary)' }}>
+                "{aiSuggestion}"
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={handleAcceptSuggestion}
+                  className="btn btn-primary btn-sm"
+                  style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDiscardSuggestion}
+                  className="btn btn-secondary btn-sm"
+                  style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={handlePolishPost}
+              className="btn btn-outline btn-sm"
+              disabled={polishing || !content.trim()}
+              style={{ fontSize: '0.85rem' }}
+            >
+              {polishing ? '✨ Polishing...' : '✨ Polish with AI'}
+            </button>
+
             <button
               type="submit"
               className="btn btn-primary"

@@ -23,6 +23,34 @@ export default function ProfilePage() {
   const [isSender, setIsSender] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [polishing, setPolishing] = useState(false);
+
+  const handlePolishBio = async () => {
+    if (!bio.trim()) {
+      alert('Please write something in your bio first to polish.');
+      return;
+    }
+    setPolishing(true);
+    try {
+      const res = await api.post('/api/ai/rewrite', { text: bio, type: 'bio' });
+      setAiSuggestion(res.data.rewritten);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to polish bio with AI');
+    } finally {
+      setPolishing(false);
+    }
+  };
+
+  const handleAcceptSuggestion = () => {
+    setBio(aiSuggestion);
+    setAiSuggestion('');
+  };
+
+  const handleDiscardSuggestion = () => {
+    setAiSuggestion('');
+  };
+
   // Check auth and fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
@@ -212,13 +240,60 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="form-group">
-                <label>Bio</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label>Bio</label>
+                  <button
+                    type="button"
+                    onClick={handlePolishBio}
+                    className="btn btn-outline btn-sm"
+                    disabled={polishing || !bio.trim()}
+                    style={{ fontSize: '0.8rem', padding: '0.25rem 0.6rem' }}
+                  >
+                    {polishing ? '✨ Polishing...' : '✨ Polish with AI'}
+                  </button>
+                </div>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell us about yourself..."
                   rows={4}
                 />
+                {aiSuggestion && (
+                  <div
+                    style={{
+                      background: 'rgba(124, 58, 237, 0.1)',
+                      border: '1px solid #7c3aed',
+                      borderRadius: '8px',
+                      padding: '0.85rem',
+                      marginTop: '0.5rem',
+                    }}
+                  >
+                    <p style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: '600', marginBottom: '0.3rem' }}>
+                      AI Suggestion (under 200 chars):
+                    </p>
+                    <p style={{ fontSize: '0.9rem', marginBottom: '0.6rem', color: 'var(--text-primary)' }}>
+                      "{aiSuggestion}"
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={handleAcceptSuggestion}
+                        className="btn btn-primary btn-sm"
+                        style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDiscardSuggestion}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
+                      >
+                        Discard
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Skills (comma separated)</label>
