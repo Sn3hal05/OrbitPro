@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
+import RecommendedConnections from '../components/RecommendedConnections';
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -318,7 +319,7 @@ export default function ProfilePage() {
         </main>
 
         <aside className="profile-sidebar">
-          {/* Side panels (Recommendations or other lists) will go here */}
+          {isOwnProfile && <RecommendedConnections userId={id} />}
         </aside>
       </div>
     </div>
