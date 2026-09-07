@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const connectionRoutes = require('./routes/connectionRoutes');
+const postRoutes = require('./routes/postRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
+app.use('/api/posts', postRoutes);
 
 const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/orbitpro';
 

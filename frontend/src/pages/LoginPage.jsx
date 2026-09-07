@@ -16,8 +16,7 @@ export default function LoginPage() {
     const userJson = localStorage.getItem('user');
     if (token && userJson) {
       try {
-        const user = JSON.parse(userJson);
-        navigate(`/profile/${user.id}`);
+        navigate('/feed');
       } catch (e) {
         localStorage.clear();
       }
@@ -34,12 +33,12 @@ export default function LoginPage() {
         const res = await api.post('/api/auth/login', { email, password });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        navigate(`/profile/${res.data.user.id}`);
+        navigate('/feed');
       } else {
         const res = await api.post('/api/auth/register', { name, email, password });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        navigate(`/profile/${res.data.user.id}`);
+        navigate('/feed');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed. Please try again.');
